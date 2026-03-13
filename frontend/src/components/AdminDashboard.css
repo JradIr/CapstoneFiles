@@ -1,0 +1,49 @@
+.admin-dashboard-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #880e4f, #b71c1c); /* admin theme */
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.admin-dashboard-box {
+  background: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  width: 600px;
+  text-align: center;
+}
+
+.admin-dashboard-box h1 {
+  margin-bottom: 20px;
+  color: #b71c1c;
+}
+
+.admin-dashboard-box p {
+  margin-bottom: 30px;
+  color: #333;
+  font-size: 16px;
+}
+
+.admin-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.admin-actions button {
+  padding: 12px 20px;
+  background: #b71c1c;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.admin-actions button:hover {
+  background: #880e4f;
+}
