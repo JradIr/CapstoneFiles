@@ -4,13 +4,12 @@ import Dashboard from "./components/Dashboard";
 import AdminLogin from "./components/AdminLogin";
 import AdminDashboard from "./components/AdminDashboard";
 import Signup from "./components/Signup";
-import { PrivateRoute } from "./services/api";
-import { AdminPrivateRoute } from "./services/api"; // new helper for admin protection
+import { PrivateRoute, AdminPrivateRoute } from "./services/api"; // consolidated import
 
 const API_URL = "http://127.0.0.1:8000/api";
 
 export const getDashboard = async () => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("access"); // use access token
   const res = await fetch(`${API_URL}/dashboard/`, {
     method: "GET",
     headers: {

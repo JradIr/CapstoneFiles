@@ -1,9 +1,11 @@
 from django.urls import path
 from .views import login_view, dashboard_view, signup
+from rest_framework_simplejwt.views import (TokenObtainPairView, TokenRefreshView, TokenVerifyView)
 
 
 urlpatterns = [
     path('login/', login_view, name='login'),
     path('dashboard/', dashboard_view, name='dashboard'),
-    path('signup/', signup)
+    path('signup/', signup),
+    
 ]

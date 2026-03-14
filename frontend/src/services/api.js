@@ -3,16 +3,17 @@ import { Navigate } from "react-router-dom";
 const API_URL = "http://127.0.0.1:8000/api";
 
 // --- API Functions ---
-export const login = async (username, password) => {
-  const res = await fetch(`${API_URL}/login/`, {   // use /login/ not /token/
+export const login = async (email, password) => {
+  const res = await fetch(`${API_URL}/login/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ email, password }), // use email instead of username
   });
   return res.json();
 };
 
-export const getDashboard = async (token) => {
+export const getDashboard = async () => {
+  const token = localStorage.getItem("access"); // use access token
   const res = await fetch(`${API_URL}/dashboard/`, {
     headers: { Authorization: `Bearer ${token}` },
   });

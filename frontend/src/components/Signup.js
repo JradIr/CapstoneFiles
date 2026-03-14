@@ -1,34 +1,43 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./Signup.css";
 
 const Signup = () => {
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState("");   // NEW username field
+  const [email, setEmail] = useState("");   
   const [password, setPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState(""); 
+  const [popupMessage, setPopupMessage] = useState("");     
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (password !== repeatPassword) {
+      setPopupMessage("Passwords do not match!");
+      return;
+    }
+
     try {
-      // Call Django backend signup endpoint
       const res = await fetch("http://127.0.0.1:8000/api/signup/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, email, password }), // include username
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        alert(data.message || "Account created successfully!");
-        navigate("/login"); // redirect back to login
+        setPopupMessage(data.message || "Account created successfully!");
+        setTimeout(() => {
+          navigate("/login"); 
+        }, 2000);
       } else {
-        alert(data.error || "Signup failed");
+        setPopupMessage(JSON.stringify(data));
       }
     } catch (err) {
       console.error("Signup error:", err);
-      alert("Something went wrong. Please try again.");
+      setPopupMessage("Something went wrong. Please try again.");
     }
   };
 
@@ -45,14 +54,41 @@ const Signup = () => {
             required
           />
           <input
+            type="email"
+            placeholder="Enter your Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
             type="password"
             placeholder="Choose a Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          <input
+            type="password"
+            placeholder="Repeat Password"
+            value={repeatPassword}
+            onChange={(e) => setRepeatPassword(e.target.value)}
+            required
+          />
           <button type="submit">Sign Up</button>
+          <p>
+            Back to login? <Link to="/login">Login</Link>
+          </p>
         </form>
+
+        {/* Popup modal */}
+        {popupMessage && (
+          <div className="popup">
+            <div className="popup-content">
+              <p>{popupMessage}</p>
+              <button onClick={() => setPopupMessage("")}>Close</button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

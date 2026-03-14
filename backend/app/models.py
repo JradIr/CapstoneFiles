@@ -1,20 +1,32 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 
-class Users(models.Model): 
-    username = models.CharField(max_length=200, unique=True)
-    password_hash = models.TextField()
-    first_name = models.CharField(max_length=200)
-    last_name = models.CharField(max_length=200)
-    date_of_birth = models.DateField(null=True, blank=True)
-    gender = models.CharField(max_length=20, null=True, blank=True)
-    contact_number = models.CharField(max_length=20, null=True, blank=True)
+class Users(AbstractUser):
+    # Override email to be unique
     email = models.EmailField(unique=True)
-    address = models.TextField(null=True, blank=True)
-    emergency_contact = models.CharField(max_length=200, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+
+    # Extra fields
+    date_of_birth = models.DateField(null=True, blank=True)  # optional
+    gender = models.CharField(max_length=20, null=True, blank=True)  # optional
+    contact_number = models.CharField(max_length=20, default="")  # safe default
+    address = models.TextField(null=True, blank=True)  # optional
+    emergency_contact = models.CharField(max_length=200, null=True, blank=True)  # optional
+    created_at = models.DateTimeField(default=timezone.now)  # avoids migration prompt
+
+    # Make email the unique identifier
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []  # no username required
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.email}"
+
+
+class UserToken(models.Model):
+    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+    access_token = models.TextField()
+    refresh_token = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class AdminAccounts(models.Model):
     ROLE_CHOICES = [

@@ -1,16 +1,13 @@
-from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from django.contrib.auth.hashers import check_password, make_password
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import Users
-from .serializers import UsersSerializer
-from django.shortcuts import render
+from django.contrib.auth import get_user_model
 
-#def home(request):
-#    return render(request, 'home.html')
+from .serializers import UsersSerializer
+
+User = get_user_model()
 
 # Helper to generate JWT tokens
 def get_tokens_for_user(user):
@@ -22,15 +19,18 @@ def get_tokens_for_user(user):
 
 @api_view(['POST'])
 def login_view(request):
-    username = request.data.get('username')
+    email = request.data.get('email')
     password = request.data.get('password')
 
+    if not email or not password:
+        return Response({'error': 'Email and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+
     try:
-        user = Users.objects.get(username=username)
-    except Users.DoesNotExist:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    if check_password(password, user.password_hash):
+    if user.check_password(password):
         tokens = get_tokens_for_user(user)
         return Response({'tokens': tokens, 'user': UsersSerializer(user).data})
     else:
@@ -40,34 +40,30 @@ def login_view(request):
 @permission_classes([IsAuthenticated])
 def dashboard_view(request):
     user = request.user
-    return Response({'message': f'Welcome {user.username}, this is your dashboard'})
+    return Response({'message': f'Welcome {user.email}, this is your dashboard'})
 
 @api_view(["POST"])
 def signup(request):
-    username = request.data.get("username")
-    password = request.data.get("password")
-
-    if Users.objects.filter(username=username).exists():
-        return Response({"error": "Username already exists"}, status=400)
-
-    user = Users.objects.create(
-        username=username,
-        password_hash=make_password(password)
-    )
-    return Response({"message": "Account created successfully!"}, status=201)
-
-"""
-@api_view(["POST"])
-def update_admin_password(request):
-    username = request.data.get("username")
-    new_password = request.data.get("new_password")
-
     try:
-        admin = AdminAccounts.objects.get(username=username)
-        admin.password_hash = make_password(new_password)
-        admin.save()
-        return Response({"message": "Password updated successfully!"})
-    except AdminAccounts.DoesNotExist:
-        return Response({"error": "Admin not found"}, status=404)
-"""
+        username = request.data.get("username")   # NEW
+        email = request.data.get("email")
+        password = request.data.get("password")
 
+        if not username or not email or not password:
+            return Response({"error": "Username, email, and password are required"}, status=400)
+
+        if User.objects.filter(username=username).exists():
+            return Response({"error": "Username already exists"}, status=400)
+
+        if User.objects.filter(email=email).exists():
+            return Response({"error": "Email already exists"}, status=400)
+
+        # Create user with both username + email
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password
+        )
+        return Response({"message": "Account created successfully!"}, status=201)
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
